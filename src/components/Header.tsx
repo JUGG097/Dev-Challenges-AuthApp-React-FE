@@ -3,16 +3,29 @@ import StyledHeader from "../styles/Header.styled";
 import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { HiUserCircle } from "react-icons/hi";
 import { FiLogOut } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { deleteTokenFromLocalStorage } from "../utils/Helpers";
 
-const Header = () => {
+const Header: React.FC<{ name: string | null; image: string | null }> = ({
+	name,
+	image,
+}) => {
+	const navigate = useNavigate();
 	const [showDropDown, setShowDropDown] = useState(false);
 
+	const handleLogOut = () => {
+		deleteTokenFromLocalStorage("authToken");
+		deleteTokenFromLocalStorage("refreshToken");
+		navigate("/login");
+	}
 	return (
 		<StyledHeader>
 			<nav className="flex items-center justify-between px-5 pt-5 pb-3">
 				<div className="">
-					<img src="img/devchallenges.svg" alt="dev challenges" />
+					<img
+						src={image ? image : "img/devchallenges.svg"}
+						alt="dev challenges"
+					/>
 				</div>
 				<div
 					className="flex items-center justify-between cta-dropdown-wrapper"
@@ -23,7 +36,7 @@ const Header = () => {
 						alt="dev challenges"
 						className="mr-2"
 					/>
-					<span className="mr-2">John Doe</span>
+					<span className="mr-2">{name ? name : "John Doe"}</span>
 
 					<span>
 						{showDropDown ? <MdArrowDropUp /> : <MdArrowDropDown />}
@@ -43,7 +56,7 @@ const Header = () => {
 						<HiUserCircle />
 						<span className="ml-2">My Profile</span>
 					</Link>
-					<div className="flex items-center mt-4 pt-4 logout">
+					<div className="flex items-center mt-4 pt-4 logout" onClick={handleLogOut}>
 						<FiLogOut />
 						<span className="ml-2">Logout</span>
 					</div>

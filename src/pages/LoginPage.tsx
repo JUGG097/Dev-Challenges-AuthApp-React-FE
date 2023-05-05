@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import StyledLoginPage from "../styles/LoginPage.styled";
 import InputText from "../components/InputText";
 import {
@@ -9,10 +9,58 @@ import {
 } from "react-icons/ai";
 
 import { MdEmail, MdLock } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+import {
+	authClient,
+	storeTokenToLocalStorage,
+} from "../utils/Helpers";
 
 const LoginPage = () => {
+	const navigate = useNavigate();
+	const [formData, setFormData] = useState({
+		email: "",
+		password: "",
+	});
+
+	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
+	};
+
+	const handleSubmit = () => {
+		if (formData.email !== "" && formData.password !== "") {
+			authClient
+				.post("/login", formData)
+				.then((resp) => {
+					if (resp.status === 200) {
+						localStorage.clear();
+						storeTokenToLocalStorage(
+							"authToken",
+							resp.data.authToken
+						);
+						storeTokenToLocalStorage(
+							"refreshToken",
+							resp.data.refreshToken
+						);
+						setTimeout(() => {
+							navigate("/profile");
+						}, 500);
+					} else {
+						console.log("Login Failed");
+					}
+				})
+				.catch((err) => {
+					console.log("Error occured", err);
+				});
+		} else {
+			console.log(
+				formData.email === ""
+					? "Please enter your email"
+					: "Please enter your password"
+			);
+		}
+	};
+
 	return (
 		<>
 			<StyledLoginPage>
@@ -29,7 +77,9 @@ const LoginPage = () => {
 								holder_text="Email"
 								inlineIcon={true}
 								id="email"
+								value={formData.email}
 								icon={<MdEmail />}
+								handleChange={handleInputChange}
 							/>
 						</div>
 
@@ -38,11 +88,16 @@ const LoginPage = () => {
 								holder_text="Password"
 								inlineIcon={true}
 								id="password"
+								value={formData.password}
 								icon={<MdLock />}
+								handleChange={handleInputChange}
+								type="password"
 							/>
 						</div>
 
-						<button className="my-3">Login</button>
+						<button className="my-3" onClick={handleSubmit}>
+							Login
+						</button>
 
 						<div className="social-signup flex text-center flex-col">
 							<p className="mt-5">
