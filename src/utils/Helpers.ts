@@ -1,6 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { NavigateFunction } from "react-router-dom";
+import { toast } from "react-toastify";
+import { CLOUDINARY_CLOUD_NAME } from "./Config";
 
 export const numberToPixel = (value: number) => {
 	return `${value.toString()}px`;
@@ -50,6 +52,10 @@ export const userClient = axios.create({
 			: "http://localhost:8080/api/v1/user",
 });
 
+export const cloudinaryClient = axios.create({
+	baseURL: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image`
+});
+
 export const refreshAuthentication = async (
 	handleSuccess: (resp: AxiosResponse<any, any>) => void,
 	navigationFunction: NavigateFunction
@@ -65,11 +71,25 @@ export const refreshAuthentication = async (
 		} else {
 			deleteTokenFromLocalStorage("refreshToken");
 			deleteTokenFromLocalStorage("authToken");
+			errorNotification("Profile Not Found, Login Again")
 			navigationFunction("/login");
 		}
 	} catch (err) {
 		deleteTokenFromLocalStorage("refreshToken");
 		deleteTokenFromLocalStorage("authToken");
+		errorNotification("Profile Not Found, Login Again")
 		navigationFunction("/login");
 	}
 };
+
+export const successNotification = (msg: string) => {
+	toast.success(msg, {
+		position: toast.POSITION.TOP_CENTER
+	})
+}
+
+export const errorNotification = (msg: string) => {
+	toast.error(msg, {
+		position: toast.POSITION.TOP_CENTER
+	})
+}

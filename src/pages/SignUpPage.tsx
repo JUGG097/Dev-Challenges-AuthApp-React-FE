@@ -13,7 +13,9 @@ import Footer from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import {
 	authClient,
+	errorNotification,
 	storeTokenToLocalStorage,
+	successNotification,
 } from "../utils/Helpers";
 
 const SignUpPage: React.FC<{}> = () => {
@@ -22,12 +24,14 @@ const SignUpPage: React.FC<{}> = () => {
 		email: "",
 		password: "",
 	});
+	const [loading, setLoading] = useState(false);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
 	};
 
 	const handleSubmit = () => {
+		setLoading(true);
 		if (formData.email !== "" && formData.password !== "") {
 			authClient
 				.post("/signup", formData)
@@ -42,15 +46,29 @@ const SignUpPage: React.FC<{}> = () => {
 							"refreshToken",
 							resp.data.refreshToken
 						);
+						successNotification(
+							"SignUp Success, redirecting to profile page"
+						);
 						setTimeout(() => {
+							setLoading(false);
 							navigate("/profile");
 						}, 500);
 					} else {
-						console.log("Sign Up Failed");
+						errorNotification("SignUp Failed!, try again");
+						setLoading(false);
+						localStorage.clear();
 					}
 				})
 				.catch((err) => {
-					console.log("Error occured", err);
+					if (err.response.data) {
+						errorNotification(
+							"SignUp Failed: " + err.response.data.message
+						);
+					} else {
+						errorNotification("SignUp Failed: " + err.message);
+					}
+					setLoading(false);
+					localStorage.clear();
 				});
 		}
 	};
@@ -96,8 +114,23 @@ const SignUpPage: React.FC<{}> = () => {
 							/>
 						</div>
 
-						<button className="my-3" onClick={handleSubmit}>
-							Start Coding now
+						<button
+							className="my-3"
+							onClick={handleSubmit}
+							disabled={loading}
+						>
+							{loading ? (
+								<>
+									<img
+										src="img/loading.svg"
+										alt=""
+										className="button-loader"
+									/>{" "}
+									Signing You Up
+								</>
+							) : (
+								"Start Coding Now"
+							)}
 						</button>
 
 						<div className="social-signup flex text-center flex-col">

@@ -5,13 +5,21 @@ import Footer from "../components/Footer";
 import StyledEditProfilePage from "../styles/EditProfilePage.styled";
 import InputText from "../components/InputText";
 import Header from "../components/Header";
-import { headerDataProps, updateUserProps, userDetailProps } from "../utils/Types";
 import {
+	headerDataProps,
+	updateUserProps,
+	userDetailProps,
+} from "../utils/Types";
+import {
+	cloudinaryClient,
+	errorNotification,
 	refreshAuthentication,
 	retrieveTokenFromLocalStorage,
 	userClient,
 } from "../utils/Helpers";
 import { AxiosResponse } from "axios";
+import { Skeleton } from "@mui/material";
+import { CLOUDINARY_PRESET } from "../utils/Config";
 
 const EditProfilePage = () => {
 	const navigate = useNavigate();
@@ -25,15 +33,51 @@ const EditProfilePage = () => {
 		name: "John Doe",
 		image: null,
 	});
-
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [profileLoading, setProfileLoading] = useState(false);
+	const [imageUploadLoading, setImageUploadLoading] = useState(false);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
 	};
 
-	const handleImageUpload = () => {};
+	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+		let files = e.target.files;
+		let file = files?.item(0);
+		const maxAllowedSize = 5 * 1024 * 1024; //Max size of 5mb
+		if (file) {
+			// Validate file type and File size
+			if (
+				!["image/png", "image/jpeg", "image/jpg"].includes(file?.type)
+			) {
+				errorNotification(
+					"Only image files (png, jpeg & jpg) are allowed"
+				);
+			} else if (file?.size > maxAllowedSize) {
+				errorNotification("Max size of 5mb allowed");
+			} else {
+				setImageUploadLoading(true);
+				const data = new FormData();
+				data.append("file", file);
+				data.append("upload_preset", CLOUDINARY_PRESET);
+				// Later use signed upload so enable overwriting uploaded images
+				cloudinaryClient
+					.post("/upload", data)
+					.then((res) => {
+						if (res.status === 200) {
+							setFormData({ ...formData, image: res.data.url });
+						} else {
+							errorNotification("Image Upload Failed, Try Again");
+						}
+						setImageUploadLoading(false);
+					})
+					.catch((err) => {
+						errorNotification("Image Upload Failed, Try Again");
+						setImageUploadLoading(false);
+					});
+			}
+		}
+	};
 
 	const handleSave = () => {
 		setLoading(true);
@@ -55,12 +99,11 @@ const EditProfilePage = () => {
 					});
 					setHeaderData({
 						name: userDetails.name,
-						image: userDetails.image
-					})
+						image: userDetails.image,
+					});
 					setLoading(false);
 				} else {
-					console.log("Profile could not be updated");
-					setError("Profile could not be updated");
+					errorNotification("Profile Update Failed");
 					setLoading(false);
 				}
 			})
@@ -68,8 +111,7 @@ const EditProfilePage = () => {
 				if (err.response.status === 401) {
 					refreshAuthentication(handleTokenRefreshSucess, navigate);
 				} else {
-					console.log("Error occured", err);
-					setError("Profile not found");
+					errorNotification("Profile Update Failed");
 				}
 			});
 	};
@@ -86,7 +128,7 @@ const EditProfilePage = () => {
 	};
 
 	useEffect(() => {
-		setLoading(true);
+		setProfileLoading(true);
 		userClient
 			.get("/profile", {
 				headers: {
@@ -105,12 +147,11 @@ const EditProfilePage = () => {
 					});
 					setHeaderData({
 						name: userDetails.name,
-						image: userDetails.image
-					})
-					setLoading(false);
+						image: userDetails.image,
+					});
+					setProfileLoading(false);
 				} else {
-					console.log("Profile not found");
-					setError("Profile not found");
+					errorNotification("Profile Not Found, Login Again");
 					navigate("/login");
 				}
 			})
@@ -118,62 +159,69 @@ const EditProfilePage = () => {
 				if (err.response === 401) {
 					refreshAuthentication(handleTokenRefreshSucess, navigate);
 				} else {
-					console.log("Error occured", err);
-					setError("Profile not found");
+					errorNotification("Profile Not Found, Login Again");
 					navigate("/login");
 				}
 			});
 	}, [navigate]);
 	return (
 		<>
-			<Header name={headerData.name} image={headerData.image} />
-			{loading ? (
-				<p>Fetching Data</p>
-			) : error === "" ? (
-				<>
-					<StyledEditProfilePage>
-						<div className="m-auto sm:w-10/12 md:w-8/12 lg:w-8/12 px-5 mt-5">
-							<Link
-								to={"/profile"}
-								className="profile-back mb-4 flex items-center"
-							>
-								<AiOutlineLeft />
-								<span className="ml-2">Back</span>
-							</Link>
-							<div className="edit-form sm:px-5 py-5">
-								<h2>Change Info</h2>
-								<h4>
-									Changes will be reflected to every services
-								</h4>
+			<Header
+				name={headerData.name}
+				image={headerData.image}
+				loading={profileLoading}
+			/>
 
-								<div className="image-upload mt-4 flex items-center">
-									<img
-										src={
-											formData.image
-												? formData.image
-												: "img/devchallenges.png"
-										}
-										alt="dev challenges"
-									/>
-									<AiFillCamera />
-									<input
-										type="file"
-										name="image-file"
-										id="image-file"
-										className="custom-file-input"
-										accept=".jpeg, .jpg, .png, "
-										onChange={handleImageUpload}
-									/>
-									<label
-										htmlFor="image-file"
-										className="ml-5"
-									>
-										CHANGE PHOTO
-									</label>
-								</div>
+			<>
+				<StyledEditProfilePage>
+					<div className="m-auto sm:w-10/12 md:w-8/12 lg:w-8/12 px-5 mt-5">
+						<Link
+							to={"/profile"}
+							className="profile-back mb-4 flex items-center"
+						>
+							<AiOutlineLeft />
+							<span className="ml-2">Back</span>
+						</Link>
+						<div className="edit-form sm:px-5 py-5">
+							<h2>Change Info</h2>
+							<h4>Changes will be reflected to every services</h4>
 
-								<div className="mt-6 sm:w-9/12">
-									<p>Name</p>
+							<div className="image-upload mt-4 flex items-center">
+								<img
+									src={
+										formData.image
+											? formData.image
+											: "img/devchallenges.png"
+									}
+									alt="dev challenges"
+								/>
+								<AiFillCamera />
+								<input
+									type="file"
+									name="image-file"
+									id="image-file"
+									className="custom-file-input"
+									accept=".jpeg, .jpg, .png, "
+									onChange={handleImageUpload}
+								/>
+								<label htmlFor="image-file" className="ml-5">
+									CHANGE PHOTO
+								</label>
+							</div>
+
+							<div className="mt-6 sm:w-9/12">
+								<p>Name</p>
+								{profileLoading ? (
+									<Skeleton variant="rectangular">
+										<InputText
+											holder_text=""
+											inlineIcon={false}
+											id=""
+											value=""
+											handleChange={handleInputChange}
+										/>
+									</Skeleton>
+								) : (
 									<InputText
 										holder_text="Enter your name..."
 										inlineIcon={false}
@@ -183,10 +231,22 @@ const EditProfilePage = () => {
 										}
 										handleChange={handleInputChange}
 									/>
-								</div>
+								)}
+							</div>
 
-								<div className="mt-4 sm:w-9/12">
-									<p>Bio</p>
+							<div className="mt-4 sm:w-9/12">
+								<p>Bio</p>
+								{profileLoading ? (
+									<Skeleton variant="rectangular">
+										<InputText
+											holder_text=""
+											inlineIcon={false}
+											id=""
+											value=""
+											handleChange={handleInputChange}
+										/>
+									</Skeleton>
+								) : (
 									<InputText
 										holder_text="Enter your bio..."
 										inlineIcon={false}
@@ -194,10 +254,22 @@ const EditProfilePage = () => {
 										value={formData.bio ? formData.bio : ""}
 										handleChange={handleInputChange}
 									/>
-								</div>
+								)}
+							</div>
 
-								<div className="mt-4 sm:w-9/12">
-									<p>Phone</p>
+							<div className="mt-4 sm:w-9/12">
+								<p>Phone</p>
+								{profileLoading ? (
+									<Skeleton variant="rectangular">
+										<InputText
+											holder_text=""
+											inlineIcon={false}
+											id=""
+											value=""
+											handleChange={handleInputChange}
+										/>
+									</Skeleton>
+								) : (
 									<InputText
 										holder_text="Enter your phone number..."
 										inlineIcon={false}
@@ -209,29 +281,42 @@ const EditProfilePage = () => {
 										}
 										handleChange={handleInputChange}
 									/>
-								</div>
+								)}
+							</div>
 
-								{/* <div className="mt-4 sm:w-9/12">
-              <p>Email</p>
-              <InputText holder_text="Enter your email..." inlineIcon={false} id="email"/>
-            </div> */}
-
-								{/* <div className="mt-4 sm:w-9/12">
-              <p>Password</p>
-              <InputText holder_text="Enter your new password..." inlineIcon={false} id="password"/>
-            </div> */}
-
-								<div className="mt-4 sm:w-9/12">
-									<button onClick={handleSave}>Save</button>
-								</div>
+							<div className="mt-4 sm:w-9/12">
+								<button
+									onClick={handleSave}
+									disabled={loading || imageUploadLoading}
+								>
+									{loading ? (
+										<>
+											<img
+												src="img/loading.svg"
+												alt=""
+												className="button-loader"
+											/>{" "}
+											Updating Data
+										</>
+									) : imageUploadLoading ? (
+										<>
+											<img
+												src="img/loading.svg"
+												alt=""
+												className="button-loader"
+											/>{" "}
+											Uploading Image
+										</>
+									) : (
+										"Save"
+									)}
+								</button>
 							</div>
 						</div>
-					</StyledEditProfilePage>
-					<Footer widthClass="sm:w-10/12 md:w-8/12 lg:w-8/12 px-5" />
-				</>
-			) : (
-				<p>Error Occured</p>
-			)}
+					</div>
+				</StyledEditProfilePage>
+				<Footer widthClass="sm:w-10/12 md:w-8/12 lg:w-8/12 px-5" />
+			</>
 		</>
 	);
 };

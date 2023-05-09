@@ -5,3 +5,8 @@
     position: relative;
     padding-bottom: 20px; /* height of your footer */
 }
+
+.button-loader {
+    display: inline-block;
+    width: 25px;
+}

@@ -8,6 +8,8 @@ import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import { protectedRouteProps } from "./utils/Types";
 import { retrieveTokenFromLocalStorage, validateToken } from "./utils/Helpers";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProtectedWrapper = ({ isAllowed, children }: protectedRouteProps) => {
 	return isAllowed ? children : <Navigate to="/login" replace />;
@@ -46,8 +48,9 @@ function App() {
 						}
 					/>
 				</Routes>
-				{/* <Footer /> */}
 			</div>
+
+			<ToastContainer autoClose={1000} theme="dark" />
 		</>
 	);
 }

@@ -13,7 +13,9 @@ import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import {
 	authClient,
+	errorNotification,
 	storeTokenToLocalStorage,
+	successNotification,
 } from "../utils/Helpers";
 
 const LoginPage = () => {
@@ -22,12 +24,14 @@ const LoginPage = () => {
 		email: "",
 		password: "",
 	});
+	const [loading, setLoading] = useState(false);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
 	};
 
 	const handleSubmit = () => {
+		setLoading(true);
 		if (formData.email !== "" && formData.password !== "") {
 			authClient
 				.post("/login", formData)
@@ -42,22 +46,34 @@ const LoginPage = () => {
 							"refreshToken",
 							resp.data.refreshToken
 						);
+						successNotification(
+							"Authentication successful, redirecting to profile page"
+						);
 						setTimeout(() => {
+							setLoading(false);
 							navigate("/profile");
 						}, 500);
 					} else {
-						console.log("Login Failed");
+						errorNotification("Authentication failed, try again");
+						localStorage.clear();
 					}
 				})
 				.catch((err) => {
-					console.log("Error occured", err);
+					if (err.response) {
+						errorNotification(
+							"Authentication failed: " + err.message
+						);
+					} else {
+						errorNotification(
+							"Authentication failed: Unknown Error"
+						);
+					}
+					setLoading(false);
+					localStorage.clear();
 				});
 		} else {
-			console.log(
-				formData.email === ""
-					? "Please enter your email"
-					: "Please enter your password"
-			);
+			errorNotification("All Fields are required");
+			setLoading(false);
 		}
 	};
 
@@ -95,8 +111,23 @@ const LoginPage = () => {
 							/>
 						</div>
 
-						<button className="my-3" onClick={handleSubmit}>
-							Login
+						<button
+							className="my-3"
+							onClick={handleSubmit}
+							disabled={loading}
+						>
+							{loading ? (
+								<>
+									<img
+										src="img/loading.svg"
+										alt=""
+										className="button-loader"
+									/>{" "}
+									Verifying Credentials
+								</>
+							) : (
+								"Login"
+							)}
 						</button>
 
 						<div className="social-signup flex text-center flex-col">
