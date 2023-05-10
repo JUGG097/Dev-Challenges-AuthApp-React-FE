@@ -17,6 +17,8 @@ import {
 	storeTokenToLocalStorage,
 	successNotification,
 } from "../utils/Helpers";
+import axios from "axios";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const LoginPage = () => {
 	const navigate = useNavigate();
@@ -26,6 +28,77 @@ const LoginPage = () => {
 	});
 	const [loading, setLoading] = useState(false);
 
+	const userLogin = (
+		uri: string,
+		email: string,
+		password: string,
+		provider: string
+	) => {
+		authClient
+			.post(uri, { email, password, provider })
+			.then((resp) => {
+				if (resp.status === 200) {
+					localStorage.clear();
+					storeTokenToLocalStorage("authToken", resp.data.authToken);
+					storeTokenToLocalStorage(
+						"refreshToken",
+						resp.data.refreshToken
+					);
+					successNotification(
+						"Authentication successful, redirecting to profile page"
+					);
+					setTimeout(() => {
+						setLoading(false);
+						navigate("/profile");
+					}, 500);
+				} else {
+					errorNotification("Authentication failed, try again");
+					localStorage.clear();
+				}
+			})
+			.catch((err) => {
+				const errData = err.response.data;
+				if (errData) {
+					errorNotification(
+						`Authentication failed: ${
+							errData.message === "Bad Credentials"
+								? "Invalid Email/Password (Are you signed up?)"
+								: errData.message
+						} `
+					);
+				} else {
+					errorNotification("Authentication failed: Unknown Error");
+				}
+				setLoading(false);
+				localStorage.clear();
+			});
+	};
+
+	const handleGoogleOauth = useGoogleLogin({
+		onSuccess: (resp) => {
+			setLoading(true);
+			axios
+				.get(
+					`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${resp.access_token}`,
+					{
+						headers: {
+							Authorization: `Bearer ${resp.access_token}`,
+							Accept: "application/json",
+						},
+					}
+				)
+				.then((res) => {
+					userLogin("/oauthLogin", res.data.email, "", "GOOGLE");
+				})
+				.catch((err) => {
+					setLoading(false);
+					errorNotification("SignUp Failed: " + err.message);
+				});
+		},
+		onError: (error) =>
+			errorNotification("SignUp Failed: " + error.error_description),
+	});
+
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
 	};
@@ -33,44 +106,7 @@ const LoginPage = () => {
 	const handleSubmit = () => {
 		setLoading(true);
 		if (formData.email !== "" && formData.password !== "") {
-			authClient
-				.post("/login", formData)
-				.then((resp) => {
-					if (resp.status === 200) {
-						localStorage.clear();
-						storeTokenToLocalStorage(
-							"authToken",
-							resp.data.authToken
-						);
-						storeTokenToLocalStorage(
-							"refreshToken",
-							resp.data.refreshToken
-						);
-						successNotification(
-							"Authentication successful, redirecting to profile page"
-						);
-						setTimeout(() => {
-							setLoading(false);
-							navigate("/profile");
-						}, 500);
-					} else {
-						errorNotification("Authentication failed, try again");
-						localStorage.clear();
-					}
-				})
-				.catch((err) => {
-					if (err.response) {
-						errorNotification(
-							"Authentication failed: " + err.message
-						);
-					} else {
-						errorNotification(
-							"Authentication failed: Unknown Error"
-						);
-					}
-					setLoading(false);
-					localStorage.clear();
-				});
+			userLogin("/login", formData.email, formData.password, "LOCAL");
 		} else {
 			errorNotification("All Fields are required");
 			setLoading(false);
@@ -136,7 +172,9 @@ const LoginPage = () => {
 							</p>
 							<div className="mt-5 media-icons flex justify-center">
 								<span className="p-2 mx-2">
-									<AiOutlineGoogle />
+									<AiOutlineGoogle
+										onClick={() => handleGoogleOauth()}
+									/>
 								</span>
 								<span className="p-2 mx-2">
 									<AiFillFacebook />

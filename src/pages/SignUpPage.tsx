@@ -7,7 +7,6 @@ import {
 	AiOutlineTwitter,
 	AiOutlineGithub,
 } from "react-icons/ai";
-
 import { MdEmail, MdLock } from "react-icons/md";
 import Footer from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,14 +16,97 @@ import {
 	storeTokenToLocalStorage,
 	successNotification,
 } from "../utils/Helpers";
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 const SignUpPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
+		name: "",
 		email: "",
 		password: "",
 	});
 	const [loading, setLoading] = useState(false);
+
+	const userSignUp = (
+		name: string,
+		email: string,
+		password: string,
+		provider: string,
+		image?: string
+	) => {
+		authClient
+			.post("/signup", {
+				name,
+				email,
+				password,
+				provider,
+				image: image || "",
+			})
+			.then((resp) => {
+				if (resp.status === 200) {
+					localStorage.clear();
+					storeTokenToLocalStorage("authToken", resp.data.authToken);
+					storeTokenToLocalStorage(
+						"refreshToken",
+						resp.data.refreshToken
+					);
+					successNotification(
+						"SignUp Success, redirecting to profile page"
+					);
+					setTimeout(() => {
+						setLoading(false);
+						navigate("/profile");
+					}, 500);
+				} else {
+					errorNotification("SignUp Failed!, try again");
+					setLoading(false);
+					localStorage.clear();
+				}
+			})
+			.catch((err) => {
+				if (err.response.data) {
+					errorNotification(
+						"SignUp Failed: " + err.response.data.message
+					);
+				} else {
+					errorNotification("SignUp Failed: " + err.message);
+				}
+				setLoading(false);
+				localStorage.clear();
+			});
+	};
+
+	const handleGoogleOauth = useGoogleLogin({
+		onSuccess: (resp) => {
+			setLoading(true);
+			axios
+				.get(
+					`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${resp.access_token}`,
+					{
+						headers: {
+							Authorization: `Bearer ${resp.access_token}`,
+							Accept: "application/json",
+						},
+					}
+				)
+				.then((res) => {
+					userSignUp(
+						res.data.name,
+						res.data.email,
+						"",
+						"GOOGLE",
+						res.data.picture
+					);
+				})
+				.catch((err) => {
+					setLoading(false);
+					errorNotification("SignUp Failed: " + err.message);
+				});
+		},
+		onError: (error) =>
+			errorNotification("SignUp Failed: " + error.error_description),
+	});
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
@@ -33,43 +115,15 @@ const SignUpPage: React.FC<{}> = () => {
 	const handleSubmit = () => {
 		setLoading(true);
 		if (formData.email !== "" && formData.password !== "") {
-			authClient
-				.post("/signup", formData)
-				.then((resp) => {
-					if (resp.status === 200) {
-						localStorage.clear();
-						storeTokenToLocalStorage(
-							"authToken",
-							resp.data.authToken
-						);
-						storeTokenToLocalStorage(
-							"refreshToken",
-							resp.data.refreshToken
-						);
-						successNotification(
-							"SignUp Success, redirecting to profile page"
-						);
-						setTimeout(() => {
-							setLoading(false);
-							navigate("/profile");
-						}, 500);
-					} else {
-						errorNotification("SignUp Failed!, try again");
-						setLoading(false);
-						localStorage.clear();
-					}
-				})
-				.catch((err) => {
-					if (err.response.data) {
-						errorNotification(
-							"SignUp Failed: " + err.response.data.message
-						);
-					} else {
-						errorNotification("SignUp Failed: " + err.message);
-					}
-					setLoading(false);
-					localStorage.clear();
-				});
+			userSignUp(
+				formData.name,
+				formData.email,
+				formData.password,
+				"LOCAL"
+			);
+		} else {
+			errorNotification("All Fields are required");
+			setLoading(false);
 		}
 	};
 
@@ -139,7 +193,9 @@ const SignUpPage: React.FC<{}> = () => {
 							</p>
 							<div className="mt-5 media-icons flex justify-center">
 								<span className="p-2 mx-2">
-									<AiOutlineGoogle />
+									<AiOutlineGoogle
+										onClick={() => handleGoogleOauth()}
+									/>
 								</span>
 								<span className="p-2 mx-2">
 									<AiFillFacebook />
