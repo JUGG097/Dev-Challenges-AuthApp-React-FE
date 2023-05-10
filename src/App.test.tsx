@@ -1,28 +1,63 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
+import React, { ReactElement } from "react";
+import { RenderOptions, render, screen } from "@testing-library/react";
 import App from "./App";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GOOGLE_CLIENT_ID } from "./utils/Config";
+
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+	return (
+		<GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+			<BrowserRouter>{children}</BrowserRouter>
+		</GoogleOAuthProvider>
+	);
+};
+
+const providersWithMemoryRouter = ({
+	children,
+	entry,
+}: {
+	children: React.ReactNode;
+	entry: string[];
+}) => {
+	return (
+		<GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+			<MemoryRouter initialEntries={entry}>{children}</MemoryRouter>
+		</GoogleOAuthProvider>
+	);
+};
+
+const customRender = (
+	ui: ReactElement,
+	options?: Omit<RenderOptions, "wrapper">
+) => render(ui, { wrapper: AllTheProviders, ...options });
+
+const customRenderWithMemoryRouter = (
+	entries: string[],
+	ui: ReactElement,
+	options?: Omit<RenderOptions, "wrapper">
+) => render(ui, { wrapper: AllTheProviders, ...options });
 
 describe("Sign Up Page Rendering", () => {
 	test("Sign Up Input Fields Rendered", () => {
-		render(<App />, { wrapper: BrowserRouter });
+		customRender(<App />);
 		expect(screen.getByPlaceholderText("Email")).toBeInTheDocument();
 		expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
 		expect(screen.getByRole("button")).toBeInTheDocument();
 	});
 	test("Social Media Sign Up Icons Rendered", () => {
-		render(<App />, { wrapper: BrowserRouter });
+		customRender(<App />);
 		expect(
 			screen.getByText("or continue with these social profile")
 		).toBeInTheDocument();
 	});
 	test("Link to Login Page Present", () => {
-		render(<App />, { wrapper: BrowserRouter });
+		customRender(<App />);
 		expect(screen.getByText("Login")).toBeInTheDocument();
 	});
 	test("Footer present", () => {
-		render(<App />, { wrapper: BrowserRouter });
+		customRender(<App />);
 		expect(screen.getByText("created by me")).toBeInTheDocument();
 		expect(screen.getByText("devChallenges.io")).toBeInTheDocument();
 	});
@@ -30,47 +65,29 @@ describe("Sign Up Page Rendering", () => {
 
 describe("Login Page Rendering", () => {
 	test("Redirect from sign up page", () => {
-		render(<App />, { wrapper: BrowserRouter });
+		customRender(<App />);
 		expect(screen.queryByText("Register")).not.toBeInTheDocument();
 		userEvent.click(screen.getByText("Login"));
 		expect(screen.getByText("Register")).toBeInTheDocument();
-	})
+	});
 	test("Login Input Fields Rendered", () => {
-		render(
-			<MemoryRouter initialEntries={["/login"]}>
-				<App />
-			</MemoryRouter>
-		);
-
+		customRenderWithMemoryRouter(["/login"], <App />);
 		expect(screen.getByPlaceholderText("Email")).toBeInTheDocument();
 		expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
 		expect(screen.getByRole("button")).toBeInTheDocument();
 	});
 	test("Social Media Login Up Icons Rendered", () => {
-		render(
-			<MemoryRouter initialEntries={["/login"]}>
-				<App />
-			</MemoryRouter>
-		);
-
+		customRenderWithMemoryRouter(["/login"], <App />);
 		expect(
 			screen.getByText("or continue with these social profile")
 		).toBeInTheDocument();
 	});
 	test("Link to SignUp Page Present", () => {
-		render(
-			<MemoryRouter initialEntries={["/login"]}>
-				<App />
-			</MemoryRouter>
-		);
+		customRenderWithMemoryRouter(["/login"], <App />);
 		expect(screen.getByText("Register")).toBeInTheDocument();
 	});
 	test("Footer present", () => {
-		render(
-			<MemoryRouter initialEntries={["/login"]}>
-				<App />
-			</MemoryRouter>
-		);
+		customRenderWithMemoryRouter(["/login"], <App />);
 		expect(screen.getByText("created by me")).toBeInTheDocument();
 		expect(screen.getByText("devChallenges.io")).toBeInTheDocument();
 	});
