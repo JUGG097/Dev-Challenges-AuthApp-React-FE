@@ -50,6 +50,10 @@ const StyledLoginPage = styled.div`
 					color: #828282;
 					border-radius: 50%;
 					cursor: pointer;
+
+					a {
+						color: #828282;
+					}
 				}
 			}
 		}

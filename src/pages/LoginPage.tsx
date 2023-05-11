@@ -4,7 +4,6 @@ import InputText from "../components/InputText";
 import {
 	AiFillFacebook,
 	AiOutlineGoogle,
-	AiOutlineTwitter,
 	AiOutlineGithub,
 } from "react-icons/ai";
 
@@ -19,6 +18,10 @@ import {
 } from "../utils/Helpers";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin, {
+	ProfileSuccessResponse,
+} from "@greatsumini/react-facebook-login";
+import { FACEBOOK_APP_ID, GITHUB_CLIENT_ID } from "../utils/Config";
 
 const LoginPage = () => {
 	const navigate = useNavigate();
@@ -61,7 +64,7 @@ const LoginPage = () => {
 				if (errData) {
 					errorNotification(
 						`Authentication failed: ${
-							errData.message === "Bad Credentials"
+							errData.message === "Bad credentials"
 								? "Invalid Email/Password (Are you signed up?)"
 								: errData.message
 						} `
@@ -98,6 +101,12 @@ const LoginPage = () => {
 		onError: (error) =>
 			errorNotification("SignUp Failed: " + error.error_description),
 	});
+
+	const handleFacebookOauth = (resp: ProfileSuccessResponse) => {
+		if (resp.email !== undefined) {
+			userLogin("/oauthLogin", resp.email, "", "FACEBOOK");
+		}
+	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
@@ -177,13 +186,32 @@ const LoginPage = () => {
 									/>
 								</span>
 								<span className="p-2 mx-2">
-									<AiFillFacebook />
+									<FacebookLogin
+										appId={FACEBOOK_APP_ID}
+										render={({ onClick }) => (
+											<AiFillFacebook onClick={onClick} />
+										)}
+										onFail={(error) => {
+											errorNotification(
+												"Facebook Oauth Failed: " +
+													error
+											);
+										}}
+										onProfileSuccess={(resp) => {
+											handleFacebookOauth(resp);
+										}}
+									/>
 								</span>
-								<span className="p-2 mx-2">
+								{/* <span className="p-2 mx-2">
 									<AiOutlineTwitter />
-								</span>
+								</span> */}
 								<span className="p-2 mx-2">
-									<AiOutlineGithub />
+									<a
+										href={`https://github.com/login/oauth/authorize?
+				scope=user:email&client_id=${GITHUB_CLIENT_ID}&redirect_uri=http://localhost:8080/api/v1/auth/githubOauth?mode=login`}
+									>
+										<AiOutlineGithub />
+									</a>
 								</span>
 							</div>
 							<p className="mt-5">

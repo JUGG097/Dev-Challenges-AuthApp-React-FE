@@ -10,6 +10,8 @@ import { protectedRouteProps } from "./utils/Types";
 import { retrieveTokenFromLocalStorage, validateToken } from "./utils/Helpers";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import OauthRedirect from "./pages/OauthRedirect";
+import PageNotFound from "./pages/PageNotFound";
 
 const ProtectedWrapper = ({ isAllowed, children }: protectedRouteProps) => {
 	return isAllowed ? children : <Navigate to="/login" replace />;
@@ -23,6 +25,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={<SignUpPage />} />
 					<Route path="/login" element={<LoginPage />} />
+					<Route path="/oauthRedirect" element={<OauthRedirect />} />
 					<Route
 						path="/profile"
 						element={
@@ -47,6 +50,7 @@ function App() {
 							</ProtectedWrapper>
 						}
 					/>
+					<Route path="*" element={<PageNotFound />} />
 				</Routes>
 			</div>
 

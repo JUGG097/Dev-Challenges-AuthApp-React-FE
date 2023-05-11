@@ -4,7 +4,6 @@ import InputText from "../components/InputText";
 import {
 	AiFillFacebook,
 	AiOutlineGoogle,
-	AiOutlineTwitter,
 	AiOutlineGithub,
 } from "react-icons/ai";
 import { MdEmail, MdLock } from "react-icons/md";
@@ -17,7 +16,11 @@ import {
 	successNotification,
 } from "../utils/Helpers";
 import { useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin, {
+	ProfileSuccessResponse,
+} from "@greatsumini/react-facebook-login";
 import axios from "axios";
+import { FACEBOOK_APP_ID, GITHUB_CLIENT_ID } from "../utils/Config";
 
 const SignUpPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -107,6 +110,18 @@ const SignUpPage: React.FC<{}> = () => {
 		onError: (error) =>
 			errorNotification("SignUp Failed: " + error.error_description),
 	});
+
+	const handleFacebookOauth = (resp: ProfileSuccessResponse) => {
+		if (resp.email !== undefined && resp.name !== undefined) {
+			userSignUp(
+				resp.name,
+				resp.email,
+				"",
+				"FACEBOOK",
+				resp.picture?.data.url
+			);
+		}
+	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
@@ -198,13 +213,32 @@ const SignUpPage: React.FC<{}> = () => {
 									/>
 								</span>
 								<span className="p-2 mx-2">
-									<AiFillFacebook />
+									<FacebookLogin
+										appId={FACEBOOK_APP_ID}
+										render={({ onClick }) => (
+											<AiFillFacebook onClick={onClick} />
+										)}
+										onFail={(error) => {
+											errorNotification(
+												"Facebook Oauth Failed: " +
+													error
+											);
+										}}
+										onProfileSuccess={(resp) => {
+											handleFacebookOauth(resp);
+										}}
+									/>
 								</span>
-								<span className="p-2 mx-2">
+								{/* <span className="p-2 mx-2">
 									<AiOutlineTwitter />
-								</span>
+								</span> */}
 								<span className="p-2 mx-2">
-									<AiOutlineGithub />
+									<a
+										href={`https://github.com/login/oauth/authorize?
+				scope=user:email&client_id=${GITHUB_CLIENT_ID}&redirect_uri=http://localhost:8080/api/v1/auth/githubOauth?mode=signup`}
+									>
+										<AiOutlineGithub />
+									</a>
 								</span>
 							</div>
 							<p className="mt-5">

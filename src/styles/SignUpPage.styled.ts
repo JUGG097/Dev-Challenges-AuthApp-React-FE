@@ -38,7 +38,7 @@ const StyledSignUpPage = styled.div`
 			}
 
 			a {
-				color: #2D9CDB;
+				color: #2d9cdb;
 
 				&:hover {
 					opacity: 0.7;
@@ -51,6 +51,10 @@ const StyledSignUpPage = styled.div`
 					color: #828282;
 					border-radius: 50%;
 					cursor: pointer;
+
+					a {
+						color: #828282;
+					}
 				}
 			}
 		}
