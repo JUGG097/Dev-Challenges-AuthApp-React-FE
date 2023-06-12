@@ -2,7 +2,11 @@ import axios, { AxiosResponse } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "react-toastify";
-import { CLOUDINARY_CLOUD_NAME } from "./Config";
+import {
+	CLOUDINARY_CLOUD_NAME,
+	SERVER_PROD_URL,
+	SERVER_DEV_URL,
+} from "./Config";
 
 export const numberToPixel = (value: number) => {
 	return `${value.toString()}px`;
@@ -41,19 +45,19 @@ export const validateToken = (token: string) => {
 export const authClient = axios.create({
 	baseURL:
 		process.env.NODE_ENV === "production"
-			? ""
-			: "http://localhost:8080/api/v1/auth",
+			? SERVER_PROD_URL + "/api/v1/auth"
+			: SERVER_DEV_URL + "/api/v1/auth",
 });
 
 export const userClient = axios.create({
 	baseURL:
 		process.env.NODE_ENV === "production"
-			? ""
-			: "http://localhost:8080/api/v1/user",
+			? SERVER_PROD_URL + "/api/v1/user"
+			: SERVER_DEV_URL + "/api/v1/user",
 });
 
 export const cloudinaryClient = axios.create({
-	baseURL: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image`
+	baseURL: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image`,
 });
 
 export const refreshAuthentication = async (
@@ -71,25 +75,25 @@ export const refreshAuthentication = async (
 		} else {
 			deleteTokenFromLocalStorage("refreshToken");
 			deleteTokenFromLocalStorage("authToken");
-			errorNotification("Profile Not Found, Login Again")
+			errorNotification("Profile Not Found, Login Again");
 			navigationFunction("/login");
 		}
 	} catch (err) {
 		deleteTokenFromLocalStorage("refreshToken");
 		deleteTokenFromLocalStorage("authToken");
-		errorNotification("Profile Not Found, Login Again")
+		errorNotification("Profile Not Found, Login Again");
 		navigationFunction("/login");
 	}
 };
 
 export const successNotification = (msg: string) => {
 	toast.success(msg, {
-		position: toast.POSITION.TOP_CENTER
-	})
-}
+		position: toast.POSITION.TOP_CENTER,
+	});
+};
 
 export const errorNotification = (msg: string) => {
 	toast.error(msg, {
-		position: toast.POSITION.TOP_CENTER
-	})
-}
+		position: toast.POSITION.TOP_CENTER,
+	});
+};
