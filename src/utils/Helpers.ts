@@ -1,12 +1,8 @@
-import axios, { AxiosResponse } from "axios";
+import  { AxiosResponse } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "react-toastify";
-import {
-	CLOUDINARY_CLOUD_NAME,
-	SERVER_PROD_URL,
-	SERVER_DEV_URL,
-} from "./Config";
+import { authClient } from "./AxiosInstances";
 
 export const numberToPixel = (value: number) => {
 	return `${value.toString()}px`;
@@ -36,29 +32,14 @@ export const validateToken = (token: string) => {
 		if (decodedToken.exp) {
 			return decodedToken.exp > currentTime;
 		}
+		deleteTokenFromLocalStorage("authToken");
 		return false;
 	} catch (error) {
+		deleteTokenFromLocalStorage("authToken");
 		return false;
 	}
 };
 
-export const authClient = axios.create({
-	baseURL:
-		process.env.NODE_ENV === "production"
-			? SERVER_PROD_URL + "/api/v1/auth"
-			: SERVER_DEV_URL + "/api/v1/auth",
-});
-
-export const userClient = axios.create({
-	baseURL:
-		process.env.NODE_ENV === "production"
-			? SERVER_PROD_URL + "/api/v1/user"
-			: SERVER_DEV_URL + "/api/v1/user",
-});
-
-export const cloudinaryClient = axios.create({
-	baseURL: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image`,
-});
 
 export const refreshAuthentication = async (
 	handleSuccess: (resp: AxiosResponse<any, any>) => void,
@@ -97,3 +78,4 @@ export const errorNotification = (msg: string) => {
 		position: toast.POSITION.TOP_CENTER,
 	});
 };
+

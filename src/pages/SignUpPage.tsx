@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import StyledSignUpPage from "../styles/SignUpPage.styled";
 import InputText from "../components/InputText";
 import {
@@ -10,11 +10,13 @@ import { MdEmail, MdLock } from "react-icons/md";
 import Footer from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import {
-	authClient,
 	errorNotification,
+	retrieveTokenFromLocalStorage,
 	storeTokenToLocalStorage,
 	successNotification,
+	validateToken,
 } from "../utils/Helpers";
+import { authClient } from "../utils/AxiosInstances";
 import { useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin, {
 	ProfileSuccessResponse,
@@ -141,6 +143,12 @@ const SignUpPage: React.FC<{}> = () => {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		if (validateToken(retrieveTokenFromLocalStorage("authToken"))) {
+			navigate("/profile");
+		}
+	}, [navigate]);
 
 	return (
 		<>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import StyledLoginPage from "../styles/LoginPage.styled";
 import InputText from "../components/InputText";
 import {
@@ -11,11 +11,13 @@ import { MdEmail, MdLock } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import {
-	authClient,
 	errorNotification,
+	retrieveTokenFromLocalStorage,
 	storeTokenToLocalStorage,
 	successNotification,
+	validateToken,
 } from "../utils/Helpers";
+import { authClient } from "../utils/AxiosInstances";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin, {
@@ -30,6 +32,12 @@ const LoginPage = () => {
 		password: "",
 	});
 	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		if (validateToken(retrieveTokenFromLocalStorage("authToken"))) {
+			navigate("/profile");
+		}
+	}, [navigate]);
 
 	const userLogin = (
 		uri: string,
@@ -167,7 +175,7 @@ const LoginPage = () => {
 										src="img/loading.svg"
 										alt=""
 										className="button-loader"
-									/>{" "}
+									/>
 									Verifying Credentials
 								</>
 							) : (

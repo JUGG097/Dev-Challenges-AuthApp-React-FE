@@ -14,7 +14,7 @@ import OauthRedirect from "./pages/OauthRedirect";
 import PageNotFound from "./pages/PageNotFound";
 
 const ProtectedWrapper = ({ isAllowed, children }: protectedRouteProps) => {
-	return isAllowed ? children : <Navigate to="/login" replace />;
+	return isAllowed ? children : <Navigate to="/login" replace={true} />;
 };
 
 function App() {

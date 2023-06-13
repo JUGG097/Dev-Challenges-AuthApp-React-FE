@@ -11,12 +11,11 @@ import {
 	userDetailProps,
 } from "../utils/Types";
 import {
-	cloudinaryClient,
 	errorNotification,
 	refreshAuthentication,
 	retrieveTokenFromLocalStorage,
-	userClient,
 } from "../utils/Helpers";
+import { userClient, cloudinaryClient } from "../utils/AxiosInstances";
 import { AxiosResponse } from "axios";
 import { Skeleton } from "@mui/material";
 import { CLOUDINARY_PRESET } from "../utils/Config";

@@ -37,7 +37,7 @@ const Header: React.FC<{
 						className="mr-2"
 					/>
 					{loading ? (
-						<Skeleton sx={{ fontSize: "12px" }} width={"100%"} />
+						<Skeleton sx={{ fontSize: "12px" }} width={"50px"} />
 					) : (
 						<span className="mr-2">{name ? name : "John Doe"}</span>
 					)}
