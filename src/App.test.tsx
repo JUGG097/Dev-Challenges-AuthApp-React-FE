@@ -1,40 +1,11 @@
-import React, { ReactElement } from "react";
-import { RenderOptions, render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import App from "./App";
-import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { GOOGLE_CLIENT_ID } from "./utils/Config";
-
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-	return (
-		<GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-			<BrowserRouter>{children}</BrowserRouter>
-		</GoogleOAuthProvider>
-	);
-};
-
-const providersWithGoogleAuth = ({
-	children,
-}: {
-	children: React.ReactNode;
-}) => {
-	return (
-		<GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-			{children}
-		</GoogleOAuthProvider>
-	);
-};
-
-const customRender = (
-	ui: ReactElement,
-	options?: Omit<RenderOptions, "wrapper">
-) => render(ui, { wrapper: AllTheProviders, ...options });
-
-const customRenderWithGoogleAuth = (
-	ui: ReactElement,
-	options?: Omit<RenderOptions, "wrapper">
-) => render(ui, { wrapper: providersWithGoogleAuth, ...options });
+import {
+	customRender,
+	customRenderWithGoogleAuth,
+} from "./__test__/TestHelpers";
 
 describe("Sign Up Page Rendering", () => {
 	test("Sign Up Input Fields Rendered", () => {

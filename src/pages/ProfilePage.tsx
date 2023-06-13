@@ -7,11 +7,11 @@ import {
 	errorNotification,
 	refreshAuthentication,
 	retrieveTokenFromLocalStorage,
-	userClient,
 } from "../utils/Helpers";
+import { userClient } from "../utils/AxiosInstances";
 import { userDetailProps } from "../utils/Types";
 import { AxiosResponse } from "axios";
-import { Skeleton} from "@mui/material";
+import { Skeleton } from "@mui/material";
 
 const ProfilePage = () => {
 	const navigate = useNavigate();
@@ -59,7 +59,11 @@ const ProfilePage = () => {
 	}, [navigate]);
 	return (
 		<>
-			<Header name={userDetails.name} image={userDetails.image} loading={loading}/>
+			<Header
+				name={userDetails.name}
+				image={userDetails.image}
+				loading={loading}
+			/>
 
 			<>
 				<StyledProfilePage>
@@ -117,7 +121,7 @@ const ProfilePage = () => {
 								<Skeleton
 									variant="text"
 									sx={{ fontSize: "18px" }}
-									width={'100%'}
+									width={"100%"}
 								/>
 							) : (
 								<p className="truncate sm:w-6/12">
@@ -135,7 +139,7 @@ const ProfilePage = () => {
 								<Skeleton
 									variant="text"
 									sx={{ fontSize: "18px" }}
-									width={'100%'}
+									width={"100%"}
 								/>
 							) : (
 								<p className="truncate sm:w-6/12">
@@ -153,7 +157,7 @@ const ProfilePage = () => {
 								<Skeleton
 									variant="text"
 									sx={{ fontSize: "18px" }}
-									width={'100%'}
+									width={"100%"}
 								/>
 							) : (
 								<p className="truncate sm:w-6/12">
@@ -173,7 +177,7 @@ const ProfilePage = () => {
 								<Skeleton
 									variant="text"
 									sx={{ fontSize: "18px" }}
-									width={'100%'}
+									width={"100%"}
 								/>
 							) : (
 								<p className="truncate sm:w-6/12">
