@@ -1,7 +1,7 @@
 import React from "react";
 import SignUpPage from "./pages/SignUpPage";
 import { GlobalStyle } from "./styles/GlobalStyles";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -13,7 +13,8 @@ import "react-toastify/dist/ReactToastify.css";
 import OauthRedirect from "./pages/OauthRedirect";
 import PageNotFound from "./pages/PageNotFound";
 
-const ProtectedWrapper = ({ isAllowed, children }: protectedRouteProps) => {
+const ProtectedWrapper = ({ children }: protectedRouteProps) => {
+	const isAllowed = validateToken(retrieveTokenFromLocalStorage("authToken"));
 	return isAllowed ? children : <Navigate to="/login" replace={true} />;
 };
 
@@ -29,11 +30,7 @@ function App() {
 					<Route
 						path="/profile"
 						element={
-							<ProtectedWrapper
-								isAllowed={validateToken(
-									retrieveTokenFromLocalStorage("authToken")
-								)}
-							>
+							<ProtectedWrapper>
 								<ProfilePage />
 							</ProtectedWrapper>
 						}
@@ -41,11 +38,7 @@ function App() {
 					<Route
 						path="/editprofile"
 						element={
-							<ProtectedWrapper
-								isAllowed={validateToken(
-									retrieveTokenFromLocalStorage("authToken")
-								)}
-							>
+							<ProtectedWrapper>
 								<EditProfilePage />
 							</ProtectedWrapper>
 						}

@@ -1,5 +1,4 @@
 export type protectedRouteProps = {
-    isAllowed: boolean;
     children: JSX.Element;
 }
 
