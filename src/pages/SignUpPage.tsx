@@ -148,7 +148,7 @@ const SignUpPage: React.FC<{}> = () => {
 		if (validateToken(retrieveTokenFromLocalStorage("authToken"))) {
 			navigate("/profile");
 		}
-	});
+	}, [navigate]);
 
 	return (
 		<>

@@ -2,6 +2,7 @@ import {
 	cleanup,
 	screen,
 	waitFor,
+	waitForElementToBeRemoved,
 } from "@testing-library/react";
 import App from "../App";
 import { MemoryRouter } from "react-router-dom";
@@ -38,9 +39,11 @@ describe("Login Workflow", () => {
 		MockedAuthClient.onPost("/login").reply(200, data);
 		MockedUserClient.onGet("/profile").reply(200, data_2);
 
+		// This part of the test is sensitive to the protected route function
 		jest.spyOn(Helpers, "validateToken")
-			.mockReturnValue(false)
-			.mockReturnValueOnce(true)
+			.mockReturnValue(true)
+			.mockReturnValueOnce(false)
+			.mockReturnValueOnce(false)
 
 		customRenderWithGoogleAuth(
 			<MemoryRouter initialEntries={["/login"]}>
@@ -71,16 +74,13 @@ describe("Login Workflow", () => {
 			)
 		).toBeInTheDocument();
 
+		await waitForElementToBeRemoved(() => screen.queryByText("Verifying Credentials"))
+
 		// Wait for redirect to Profile Page
 		await waitFor(() => screen.findByText("Personal info"));
 
 		// Wait API call to get details
 		await waitFor(() => screen.findAllByText("Peter Pan"));
-
-		expect(
-			screen.queryByText("Verifying Credentials")
-		).not.toBeInTheDocument();
-
 
 	});
 

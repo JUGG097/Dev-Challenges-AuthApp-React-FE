@@ -38,8 +38,9 @@ describe("SignUp Workflow", () => {
 		MockedUserClient.onGet("/profile").reply(200, data_2);
 
 		jest.spyOn(Helpers, "validateToken")
-			.mockReturnValue(false)
-			.mockReturnValueOnce(true)
+			.mockReturnValue(true)
+			.mockReturnValueOnce(false)
+			.mockReturnValueOnce(false)
 
 		customRenderWithGoogleAuth(
 			<MemoryRouter initialEntries={["/"]}>

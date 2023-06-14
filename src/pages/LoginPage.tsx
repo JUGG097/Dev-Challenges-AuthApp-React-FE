@@ -37,7 +37,7 @@ const LoginPage = () => {
 		if (validateToken(retrieveTokenFromLocalStorage("authToken"))) {
 			navigate("/profile");
 		}
-	});
+	}, [navigate]);
 
 	const userLogin = (
 		uri: string,
