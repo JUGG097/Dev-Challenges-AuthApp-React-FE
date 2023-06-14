@@ -1,7 +1,7 @@
 import React from "react";
 import SignUpPage from "./pages/SignUpPage";
 import { GlobalStyle } from "./styles/GlobalStyles";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Routes, Route, Navigate} from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
