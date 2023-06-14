@@ -22,7 +22,7 @@ import FacebookLogin, {
 	ProfileSuccessResponse,
 } from "@greatsumini/react-facebook-login";
 import axios from "axios";
-import { FACEBOOK_APP_ID, GITHUB_CLIENT_ID } from "../utils/Config";
+import { FACEBOOK_APP_ID, GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
 
 const SignUpPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -243,7 +243,7 @@ const SignUpPage: React.FC<{}> = () => {
 								<span className="p-2 mx-2">
 									<a
 										href={`https://github.com/login/oauth/authorize?
-				scope=user:email&client_id=${GITHUB_CLIENT_ID}&redirect_uri=http://localhost:8080/api/v1/auth/githubOauth?mode=signup`}
+				scope=user:email&client_id=${GITHUB_CLIENT_ID}&redirect_uri=${GITHUB_SERVER_URL}/api/v1/auth/githubOauth?mode=signup`}
 									>
 										<AiOutlineGithub />
 									</a>
