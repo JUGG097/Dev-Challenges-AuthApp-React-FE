@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import StyledLoginPage from "../styles/LoginPage.styled";
 import InputText from "../components/InputText";
 import {
-	AiFillFacebook,
 	AiOutlineGoogle,
 	AiOutlineGithub,
 } from "react-icons/ai";
@@ -20,10 +19,7 @@ import {
 import { authClient } from "../utils/AxiosInstances";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
-import FacebookLogin, {
-	ProfileSuccessResponse,
-} from "@greatsumini/react-facebook-login";
-import { FACEBOOK_APP_ID, GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
+import { GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
 
 const LoginPage = () => {
 	const navigate = useNavigate();
@@ -110,11 +106,11 @@ const LoginPage = () => {
 			errorNotification("SignUp Failed: " + error.error_description),
 	});
 
-	const handleFacebookOauth = (resp: ProfileSuccessResponse) => {
-		if (resp.email !== undefined) {
-			userLogin("/oauthLogin", resp.email, "", "FACEBOOK");
-		}
-	};
+	// const handleFacebookOauth = (resp: ProfileSuccessResponse) => {
+	// 	if (resp.email !== undefined) {
+	// 		userLogin("/oauthLogin", resp.email, "", "FACEBOOK");
+	// 	}
+	// };
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
@@ -193,7 +189,7 @@ const LoginPage = () => {
 										onClick={() => handleGoogleOauth()}
 									/>
 								</span>
-								<span className="p-2 mx-2">
+								{/* <span className="p-2 mx-2">
 									<FacebookLogin
 										appId={FACEBOOK_APP_ID}
 										render={({ onClick }) => (
@@ -209,7 +205,7 @@ const LoginPage = () => {
 											handleFacebookOauth(resp);
 										}}
 									/>
-								</span>
+								</span> */}
 								{/* <span className="p-2 mx-2">
 									<AiOutlineTwitter />
 								</span> */}

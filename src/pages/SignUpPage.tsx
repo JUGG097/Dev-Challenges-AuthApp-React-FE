@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import StyledSignUpPage from "../styles/SignUpPage.styled";
 import InputText from "../components/InputText";
 import {
-	AiFillFacebook,
 	AiOutlineGoogle,
 	AiOutlineGithub,
 } from "react-icons/ai";
@@ -18,11 +17,8 @@ import {
 } from "../utils/Helpers";
 import { authClient } from "../utils/AxiosInstances";
 import { useGoogleLogin } from "@react-oauth/google";
-import FacebookLogin, {
-	ProfileSuccessResponse,
-} from "@greatsumini/react-facebook-login";
 import axios from "axios";
-import { FACEBOOK_APP_ID, GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
+import { GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
 
 const SignUpPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -113,17 +109,17 @@ const SignUpPage: React.FC<{}> = () => {
 			errorNotification("SignUp Failed: " + error.error_description),
 	});
 
-	const handleFacebookOauth = (resp: ProfileSuccessResponse) => {
-		if (resp.email !== undefined && resp.name !== undefined) {
-			userSignUp(
-				resp.name,
-				resp.email,
-				"",
-				"FACEBOOK",
-				resp.picture?.data.url
-			);
-		}
-	};
+	// const handleFacebookOauth = (resp: ProfileSuccessResponse) => {
+	// 	if (resp.email !== undefined && resp.name !== undefined) {
+	// 		userSignUp(
+	// 			resp.name,
+	// 			resp.email,
+	// 			"",
+	// 			"FACEBOOK",
+	// 			resp.picture?.data.url
+	// 		);
+	// 	}
+	// };
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.currentTarget.name]: e.target.value });
@@ -220,7 +216,7 @@ const SignUpPage: React.FC<{}> = () => {
 										onClick={() => handleGoogleOauth()}
 									/>
 								</span>
-								<span className="p-2 mx-2">
+								{/* <span className="p-2 mx-2">
 									<FacebookLogin
 										appId={FACEBOOK_APP_ID}
 										render={({ onClick }) => (
@@ -236,7 +232,7 @@ const SignUpPage: React.FC<{}> = () => {
 											handleFacebookOauth(resp);
 										}}
 									/>
-								</span>
+								</span> */}
 								{/* <span className="p-2 mx-2">
 									<AiOutlineTwitter />
 								</span> */}
