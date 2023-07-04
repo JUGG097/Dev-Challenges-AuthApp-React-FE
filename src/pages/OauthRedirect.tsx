@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import {
 	errorNotification,
-	storeTokenToLocalStorage,
 	successNotification,
 	validateToken,
 } from "../utils/Helpers";
 import { useNavigate } from "react-router-dom";
+import { addValue } from "retrievetokens";
 
 const OauthRedirect = () => {
 	const queryParameters = new URLSearchParams(window.location.search);
@@ -17,8 +17,8 @@ const OauthRedirect = () => {
 	useEffect(() => {
 		if (validateToken(authToken || "")) {
 			localStorage.clear();
-			storeTokenToLocalStorage("authToken", authToken || "");
-			storeTokenToLocalStorage("refreshToken", refreshToken || "");
+			addValue("authToken", authToken || "", "local");
+			addValue("refreshToken", refreshToken || "", "local");
 			mode === "signup"
 				? successNotification(
 						"GitHub SignUp Success, redirecting to profile page"

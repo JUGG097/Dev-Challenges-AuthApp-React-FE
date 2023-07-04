@@ -4,9 +4,8 @@ import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { HiUserCircle } from "react-icons/hi";
 import { FiLogOut } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
-import { deleteTokenFromLocalStorage } from "../utils/Helpers";
-
 import { Skeleton } from "@mui/material";
+import { deleteValue } from "retrievetokens";
 
 const Header: React.FC<{
 	name: string | null;
@@ -17,8 +16,8 @@ const Header: React.FC<{
 	const [showDropDown, setShowDropDown] = useState(false);
 
 	const handleLogOut = () => {
-		deleteTokenFromLocalStorage("authToken");
-		deleteTokenFromLocalStorage("refreshToken");
+		deleteValue("refreshToken", "local");
+		deleteValue("authToken", "local");
 		navigate("/login");
 	};
 	return (

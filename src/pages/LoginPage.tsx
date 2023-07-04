@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import StyledLoginPage from "../styles/LoginPage.styled";
 import InputText from "../components/InputText";
-import {
-	AiOutlineGoogle,
-	AiOutlineGithub,
-} from "react-icons/ai";
+import { AiOutlineGoogle, AiOutlineGithub } from "react-icons/ai";
 
 import { MdEmail, MdLock } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +9,6 @@ import Footer from "../components/Footer";
 import {
 	errorNotification,
 	retrieveTokenFromLocalStorage,
-	storeTokenToLocalStorage,
 	successNotification,
 	validateToken,
 } from "../utils/Helpers";
@@ -20,6 +16,7 @@ import { authClient } from "../utils/AxiosInstances";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import { GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
+import { addValue } from "retrievetokens";
 
 const LoginPage = () => {
 	const navigate = useNavigate();
@@ -46,11 +43,8 @@ const LoginPage = () => {
 			.then((resp) => {
 				if (resp.status === 200) {
 					localStorage.clear();
-					storeTokenToLocalStorage("authToken", resp.data.authToken);
-					storeTokenToLocalStorage(
-						"refreshToken",
-						resp.data.refreshToken
-					);
+					addValue("authToken", resp.data.authToken, "local");
+					addValue("refreshToken", resp.data.refreshToken, "local");
 					successNotification(
 						"Authentication successful, redirecting to profile page"
 					);
