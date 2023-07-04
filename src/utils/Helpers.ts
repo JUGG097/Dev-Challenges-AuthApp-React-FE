@@ -1,27 +1,20 @@
-import  { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "react-toastify";
 import { authClient } from "./AxiosInstances";
+import { addValue, deleteValue, retrieveValue } from "retrievetokens";
 
 export const numberToPixel = (value: number) => {
 	return `${value.toString()}px`;
 };
 
-export const storeTokenToLocalStorage = (key: string, token: string) => {
-	localStorage.setItem(key, token);
-};
-
 export const retrieveTokenFromLocalStorage = (key: string) => {
-	const itemValue = localStorage.getItem(key);
+	const itemValue = retrieveValue(key, "local");
 	if (itemValue) {
 		return itemValue;
 	}
 	return "";
-};
-
-export const deleteTokenFromLocalStorage = (key: string) => {
-	localStorage.removeItem(key);
 };
 
 export const validateToken = (token: string) => {
@@ -32,14 +25,13 @@ export const validateToken = (token: string) => {
 		if (decodedToken.exp) {
 			return decodedToken.exp > currentTime;
 		}
-		deleteTokenFromLocalStorage("authToken");
+		deleteValue("authToken", "local");
 		return false;
 	} catch (error) {
-		deleteTokenFromLocalStorage("authToken");
+		deleteValue("authToken", "local");
 		return false;
 	}
 };
-
 
 export const refreshAuthentication = async (
 	handleSuccess: (resp: AxiosResponse<any, any>) => void,
@@ -50,18 +42,18 @@ export const refreshAuthentication = async (
 			refreshToken: retrieveTokenFromLocalStorage("refreshToken"),
 		});
 		if (resp.status === 200) {
-			deleteTokenFromLocalStorage("authToken");
-			storeTokenToLocalStorage("authToken", resp.data.authToken);
+			deleteValue("authToken", "local");
+			addValue("authToken", resp.data.authToken, "local");
 			handleSuccess(resp);
 		} else {
-			deleteTokenFromLocalStorage("refreshToken");
-			deleteTokenFromLocalStorage("authToken");
+			deleteValue("refreshToken", "local");
+			deleteValue("authToken", "local");
 			errorNotification("Profile Not Found, Login Again");
 			navigationFunction("/login");
 		}
 	} catch (err) {
-		deleteTokenFromLocalStorage("refreshToken");
-		deleteTokenFromLocalStorage("authToken");
+		deleteValue("refreshToken", "local");
+		deleteValue("authToken", "local");
 		errorNotification("Profile Not Found, Login Again");
 		navigationFunction("/login");
 	}
@@ -78,4 +70,3 @@ export const errorNotification = (msg: string) => {
 		position: toast.POSITION.TOP_CENTER,
 	});
 };
-
