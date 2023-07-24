@@ -16,7 +16,7 @@ import { authClient } from "../utils/AxiosInstances";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import { GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
-import { addValue } from "retrievetokens";
+import {addValues } from "retrievetokens";
 
 const LoginPage = () => {
 	const navigate = useNavigate();
@@ -42,9 +42,13 @@ const LoginPage = () => {
 			.post(uri, { email, password, provider })
 			.then((resp) => {
 				if (resp.status === 200) {
-					localStorage.clear();
-					addValue("authToken", resp.data.authToken, "local");
-					addValue("refreshToken", resp.data.refreshToken, "local");
+					addValues(
+						{
+							authToken: resp.data.authToken,
+							refreshToken: resp.data.refreshToken,
+						},
+						"local"
+					);
 					successNotification(
 						"Authentication successful, redirecting to profile page"
 					);

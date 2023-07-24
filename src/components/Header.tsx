@@ -5,7 +5,7 @@ import { HiUserCircle } from "react-icons/hi";
 import { FiLogOut } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@mui/material";
-import { deleteValue } from "retrievetokens";
+import { deleteValues } from "retrievetokens";
 
 const Header: React.FC<{
 	name: string | null;
@@ -16,8 +16,7 @@ const Header: React.FC<{
 	const [showDropDown, setShowDropDown] = useState(false);
 
 	const handleLogOut = () => {
-		deleteValue("refreshToken", "local");
-		deleteValue("authToken", "local");
+		deleteValues(["refreshToken", "authToken"], "local");
 		navigate("/login");
 	};
 	return (

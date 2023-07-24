@@ -3,7 +3,7 @@ import jwtDecode, { JwtPayload } from "jwt-decode";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "react-toastify";
 import { authClient } from "./AxiosInstances";
-import { addValue, deleteValue, retrieveValue } from "retrievetokens";
+import { addValue, deleteValue, retrieveValue, deleteValues } from "retrievetokens";
 
 export const numberToPixel = (value: number) => {
 	return `${value.toString()}px`;
@@ -46,14 +46,12 @@ export const refreshAuthentication = async (
 			addValue("authToken", resp.data.authToken, "local");
 			handleSuccess(resp);
 		} else {
-			deleteValue("refreshToken", "local");
-			deleteValue("authToken", "local");
+			deleteValues(["refreshToken", "authToken"], "local")
 			errorNotification("Profile Not Found, Login Again");
 			navigationFunction("/login");
 		}
 	} catch (err) {
-		deleteValue("refreshToken", "local");
-		deleteValue("authToken", "local");
+		deleteValues(["refreshToken", "authToken"], "local")
 		errorNotification("Profile Not Found, Login Again");
 		navigationFunction("/login");
 	}

@@ -5,7 +5,7 @@ import {
 	validateToken,
 } from "../utils/Helpers";
 import { useNavigate } from "react-router-dom";
-import { addValue } from "retrievetokens";
+import {addValues } from "retrievetokens";
 
 const OauthRedirect = () => {
 	const queryParameters = new URLSearchParams(window.location.search);
@@ -16,9 +16,13 @@ const OauthRedirect = () => {
 
 	useEffect(() => {
 		if (validateToken(authToken || "")) {
-			localStorage.clear();
-			addValue("authToken", authToken || "", "local");
-			addValue("refreshToken", refreshToken || "", "local");
+			addValues(
+				{
+					authToken: authToken || "",
+					refreshToken: refreshToken || "",
+				},
+				"local"
+			);
 			mode === "signup"
 				? successNotification(
 						"GitHub SignUp Success, redirecting to profile page"
@@ -40,8 +44,10 @@ const OauthRedirect = () => {
 	});
 	return (
 		<div className="mt-10 text-center">
-			<h4 className="to-cyan-700 font-extrabold text-2xl">Oauth Redirect</h4>
-            <p>...redirecting...</p>
+			<h4 className="to-cyan-700 font-extrabold text-2xl">
+				Oauth Redirect
+			</h4>
+			<p>...redirecting...</p>
 		</div>
 	);
 };

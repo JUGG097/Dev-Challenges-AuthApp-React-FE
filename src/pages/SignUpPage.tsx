@@ -18,7 +18,7 @@ import { authClient } from "../utils/AxiosInstances";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { GITHUB_CLIENT_ID, GITHUB_SERVER_URL } from "../utils/Config";
-import { addValue } from "retrievetokens";
+import { addValues } from "retrievetokens";
 
 const SignUpPage: React.FC<{}> = () => {
 	const navigate = useNavigate();
@@ -46,9 +46,13 @@ const SignUpPage: React.FC<{}> = () => {
 			})
 			.then((resp) => {
 				if (resp.status === 200) {
-					localStorage.clear();
-					addValue("authToken", resp.data.authToken, "local");
-					addValue("refreshToken", resp.data.refreshToken, "local");
+					addValues(
+						{
+							authToken: resp.data.authToken,
+							refreshToken: resp.data.refreshToken,
+						},
+						"local"
+					);
 					successNotification(
 						"SignUp Success, redirecting to profile page"
 					);
